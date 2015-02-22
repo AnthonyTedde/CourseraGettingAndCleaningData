@@ -6,8 +6,8 @@ The experiments have been carried out with a group of 30 volunteers within an ag
 The sensor signals (accelerometer and gyroscope) were pre-processed by applying noise filters and then sampled in fixed-width sliding windows of 2.56 sec and 50% overlap (128 readings/window). The sensor acceleration signal, which has gravitational and body motion components, was separated using a Butterworth low-pass filter into body acceleration and gravity. The gravitational force is assumed to have only low frequency components, therefore a filter with 0.3 Hz cutoff frequency was used. From each window, a vector of features was obtained by calculating variables from the time and frequency domain. See 'features_info.txt' for more details. 
 
 ## Transformation
-All variables have been transform in that way:
-`name_of_the_variable.operation.[axe]`
+All variables have been transformed in that way:
+`name_of_the_variable.operation_[axe]`
 ## Variables
 | Variables | Details
 |-----------|--------
