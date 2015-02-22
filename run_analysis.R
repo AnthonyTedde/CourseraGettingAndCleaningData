@@ -9,7 +9,7 @@ if(!file.exists("data.zip")) {
   unzip("data.zip")
 }
 ##
-# Misc
+# Path for the loading file
 ##
 repo <- "UCI HAR Dataset"
 
