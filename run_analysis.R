@@ -1,4 +1,5 @@
 library(plyr)
+library(data.table)
 # Download the data
 url <- paste("https://d396qusza40orc.cloudfront.net/",
              "getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip",
@@ -11,14 +12,22 @@ if(!file.exists("data.zip")) {
 # Misc
 ##
 repo <- "UCI HAR Dataset"
+
 feature.file <- paste(repo,
                       "features.txt",
                       sep = "/")
-x.file <- function(file) {
-  file <- paste(repo,
-                file,
-                paste("X_", paste(file, "txt", sep = "."), sep = ""),
-                sep = "/")
+
+activity.label <- paste(repo,
+                        "activity_labels.txt",
+                        sep = "/")
+
+
+file.toload <- function(file, prefix) {
+  prefix <- paste(prefix, '_', sep = "")
+  f <- paste(repo,
+             file,
+             paste(prefix, paste(file, "txt", sep = "."), sep = ""),
+             sep = "/")
 }
 
 ##
@@ -29,10 +38,10 @@ feature <- read.table(feature.file,
                       col.names = c("id", "name"))
 
 # Get the training and testing set
-test <- read.table(x.file("test"),
+test <- read.table(file.toload("test", "X"),
                    col.names = feature$name)
 
-train <- read.table(x.file("train"),
+train <- read.table(file.toload("train", "X"),
                     col.names = feature$name)
 
 data.merge <- rbind(test, train) 
@@ -47,14 +56,15 @@ data.merge <- data.merge[, col]
 # 3. Uses descriptive activity names to name the activities in the dataset
 ##
 # Get the activity labels
-activity <- read.table("UCI HAR Dataset/activity_labels.txt",
+activity <- read.table(activity.label,
                        sep = " ",
                        col.names = c("activity_id", "activity_label"))
+activity <- factor(activity, levels = activity$activity_id, labels = activity$activity_label)
 
 # Get the activity id related to train and test dataset
-ytrain <- read.table("UCI HAR Dataset/train/y_train.txt")
+ytrain <- read.table(file.toload("train", "Y"))
 
-ytest <- read.table("UCI HAR Dataset/test/y_test.txt")
+ytest <- read.table(file.toload("test", "Y"))
 
 ydata.merge <- rbind(ytest, ytrain)
 
@@ -71,6 +81,7 @@ names(data.merge) <- gsub('^f', 'frequency_', names(data.merge))
 names(data.merge) <- gsub('BodyBody', '2body_', names(data.merge))
 names(data.merge) <- gsub('_Body', '_body_', names(data.merge))
 names(data.merge) <- gsub('Acc', 'acceleration_', names(data.merge))
+names(data.merge) <- gsub('Gravity', 'gravity_', names(data.merge))
 names(data.merge) <- gsub('Gyro', 'gyroscope_', names(data.merge))
 names(data.merge) <- gsub('Jerk', 'jerk_', names(data.merge))
 names(data.merge) <- gsub('Mag', 'magnitude_', names(data.merge))
@@ -83,18 +94,18 @@ names(data.merge) <- gsub('\\.{2}', '', names(data.merge))
 # and each subject
 ##
 ## Add the subject to compute data for the tidy dataset
-subject.test <- read.table("UCI HAR Dataset/test/subject_test.txt")
-subject.train <- read.table("UCI HAR Dataset/train/subject_train.txt")
+subject.test <- read.table(file.toload("test", "subject"))
+subject.train <- read.table(file.toload("train", "subject"))
 
 subject <- rbind(subject.test, 
                  subject.train)
 data.tidy <- data.merge
-data.tidy$subject <- subject$V1
+data.tidy$subject <- factor(subject$V1)
 
 
 DT <- data.table(data.tidy)
-columns <- names(DT)[names(DT) == "subject" | names(DT) == "activity_id"]
-DT <- DT[,lapply(.SD,sum), by = list(subject, activity_id)]
+DT <- DT[, lapply(.SD, mean), by = list(activity, subject)]
+
 
 ##
 # Save the dataset
