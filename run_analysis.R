@@ -110,6 +110,6 @@ DT <- DT[, lapply(.SD, mean), by = list(activity, subject)]
 ##
 # Save the dataset
 ##
-write.table(data.merge, file='tidy-dataset.txt')
-write.table(DT, file='tidy-dataset-by-subject-activity.txt')
+write.table(data.merge, file='tidy-dataset.txt', row.names = F)
+write.table(DT, file='tidy-dataset-by-subject-activity.txt', row.names = F)
 
